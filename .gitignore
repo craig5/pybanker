@@ -14,7 +14,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+### I put my stuff in lib... sue me...
+# lib/
 lib64/
 parts/
 sdist/
@@ -55,3 +56,12 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# virtualenv/dev
+venv
+
+# vim temp files
+*.swp
+
+# tests lib dir
+.lib
