@@ -10,7 +10,7 @@ setup_args = {
     'version': '0.0.1',
     'description': 'Simple command line tool for managing your finances.',
     'author': 'Craig Sebenik',
-    'author_email': 'craig5@pobox.com',
+    'author_email': 'craig5@users.noreply.github.com',
     'url': 'http://www.friedserver.com/',
     'keywords': ['python', 'python3', 'finance', 'money', 'quicken'],
 }
