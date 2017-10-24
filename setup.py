@@ -17,14 +17,10 @@ setup_args = {
 #
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 _LIB_DIR = 'lib'
-_SCRIPTS_DIR = 'scripts'
 _DATA_DIR = 'data'
 _TESTS_DIR = 'tests'
 _TESTS_LIB_DIR = os.path.join('tests', '.lib')
 _DATA_LIST = ['{0}/*'.format(_DATA_DIR)]
-_SCRIPTS_LIST = [os.path.join(_SCRIPTS_DIR, f)
-                 for f in os.listdir(_SCRIPTS_DIR)
-                 if not f.startswith('.')]
 _REQUIREMENTS_FILE = 'requirements.txt'
 _REQUIREMENTS = []
 _TESTS_REQUIREMENTS_FILE = os.path.join(_TESTS_DIR, _REQUIREMENTS_FILE)
@@ -47,7 +43,6 @@ setup_args['package_dir'] = {'': _LIB_DIR}
 setup_args['packages'] = setuptools.find_packages(_LIB_DIR)
 setup_args['package_data'] = {'': _DATA_LIST}
 setup_args['include_package_data'] = True
-setup_args['scripts'] = _SCRIPTS_LIST
 setup_args['install_requires'] = _REQUIREMENTS
 setup_args['setup_requires'] = _TESTS_REQUIREMENTS
 setup_args['test_suite'] = 'nose2.collector.collector'
@@ -79,8 +74,10 @@ class Info(setuptools.Command):
 
 
 setup_args['cmdclass'] = {'info': Info}
-
+setup_args['entry_points'] = {
+    'console_scripts': [
+        'pybanker=pybanker.cli:PyBankerCli.main'
+    ]
+}
 
 setuptools.setup(**setup_args)
-
-# End of file.

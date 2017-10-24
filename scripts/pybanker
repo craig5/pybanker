@@ -12,22 +12,21 @@ import pybanker
 import pybanker.shared
 
 
-GLOBAL_CONFIG = pybanker.shared.GlobalConfig()
-# GLOBAL_CONFIG.default_logger_level = logging.DEBUG
 
 
 class PyBankerCli(object):
+    global_config = pybanker.shared.GlobalConfig()
 
     def __init__(self):
         self._init_logger()
-        self._init_cli()
         self._init_vars()
         self._load_config()
+        self._init_cli()
 
     def _init_logger(self):
         """Initialize logger. (self.logger)"""
         logger_name = self.__class__.__name__
-        logger_level = GLOBAL_CONFIG.default_logger_level
+        logger_level = self.global_config.default_logger_level
         format_string = '[%(levelname)s] %(name)s(%(lineno)d) - %(message)s'
         formatter = logging.Formatter(format_string)
         handler = logging.StreamHandler()
@@ -43,14 +42,23 @@ class PyBankerCli(object):
         self.cli.add_argument(
             '--debug',
             action='store_true',
-            help='Set debug level (logger)')
+            help='Set debug level (logger)'
+            )
+        command_opts = [cur['option'] for cur in self.global_config.commands]
+        self.cli.add_argument(
+            'command',
+            nargs='?',
+            default=command_opts[0],
+            choices=command_opts,
+            help='Command to run'
+            )
 
     def _init_vars(self):
         self.config = None
         self.data_dir = None
 
     def _load_config(self):
-        conf_file = GLOBAL_CONFIG.default_config_file
+        conf_file = self.global_config.default_config_file
         self.logger.debug('Loading config: {0}'.format(conf_file))
         self.config = configparser.ConfigParser()
         with open(conf_file, 'r') as fp:
@@ -68,16 +76,17 @@ class PyBankerCli(object):
             for h in self.logger.handlers:
                 h.setLevel(debug_level)
             self.logger.debug('Logger level reset to debug.')
+        self.command = args.command
+        self.logger.debug('Command: {}'.format(self.command))
 
     def main(self):
         self.logger.debug('Inside main.')
         self.parse_args()
         bank = pybanker.Banker(logger_level=self.logger.level)
         bank.data_dir = self.data_dir
-        bank.main()
+        bank.main(self.command)
 
 
 if __name__ == '__main__':
     pbc = PyBankerCli()
     pbc.main()
-# End of file.
