@@ -44,7 +44,7 @@ class PyBankerCli(object):
             help='Change logging level.'
         )
         command_opts = [cur['option'] for cur in self.global_config.commands]
-        default_command = default=command_opts[0]
+        default_command = command_opts[0]
         self.cli.add_argument(
             'command',
             nargs='?',
@@ -76,6 +76,5 @@ class PyBankerCli(object):
 
     @staticmethod
     def main():
-        pybanker.shared.GlobalConfig.logger_level = logging.DEBUG#XXX
         cli_obj = PyBankerCli()
         cli_obj()

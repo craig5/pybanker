@@ -7,7 +7,6 @@ import logging
 import os
 import pkg_resources
 # third party libraries
-import yaml
 # custom libraries
 
 
@@ -53,6 +52,7 @@ class GlobalConfig(object):
     @property
     def schedule_file(self):
         return os.path.join(self.data_dir, 'schedule.yaml')
+
 
 if __name__ == '__main__':
     pass

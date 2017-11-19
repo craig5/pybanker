@@ -8,6 +8,10 @@ BIN_DIR = $(VENV_DIR)/bin
 PYTHON_CMD = $(BIN_DIR)/python3
 PIP_CMD = $(BIN_DIR)/pip
 #
+NOSE_CMD = $(BIN_DIR)/nose2
+NOSE_ARGS =
+FLAKE8_CMD = $(BIN_DIR)/flake8
+FLAKE8_ARGS =
 # This sucks...
 # Shouldn't need a hard-coded path, but my path is messed up.
 SYS_PYTHON_CMD = /usr/bin/python3
@@ -21,7 +25,7 @@ _local_virtualenv:
 	$(PIP_CMD) install --upgrade pip
 
 pip_reqs:
-	$(PIP_CMD) install -r tests/requirements.txt -t tests/.lib
+	$(PIP_CMD) install -r tests/requirements.txt
 	$(PIP_CMD) install -r requirements.txt
 	$(PIP_CMD) install -r dev_requirements.txt
 
@@ -34,8 +38,9 @@ info:
 	$(PYTHON_CMD) setup.py info
 
 test:
-	$(PYTHON_CMD) setup.py flake8
-	$(PYTHON_CMD) setup.py test
+	$(NOSE_CMD) $(NOSE_ARGS)
+	#$(PYTHON_CMD) setup.py flake8
+	#$(PYTHON_CMD) setup.py test
 #	$(NOSE_CMD) --verbose
 
 clean:

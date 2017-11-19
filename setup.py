@@ -7,7 +7,7 @@ import sys
 
 setup_args = {
     'name': 'pybanker',
-    'version': '0.0.1',
+    'version': '0.0.2',
     'description': 'Simple command line tool for managing your finances.',
     'author': 'Craig Sebenik',
     'author_email': 'craig5@users.noreply.github.com',
@@ -19,32 +19,13 @@ _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 _LIB_DIR = 'lib'
 _DATA_DIR = 'data'
 _TESTS_DIR = 'tests'
-_TESTS_LIB_DIR = os.path.join('tests', '.lib')
 _DATA_LIST = ['{0}/*'.format(_DATA_DIR)]
-_REQUIREMENTS_FILE = 'requirements.txt'
-_REQUIREMENTS = []
-_TESTS_REQUIREMENTS_FILE = os.path.join(_TESTS_DIR, _REQUIREMENTS_FILE)
-_TESTS_REQUIREMENTS = []
-try:
-    with open(_REQUIREMENTS_FILE, 'r') as fp:
-        _REQUIREMENTS = fp.read().splitlines()
-except os.FileNotFoundError:
-    print('Requirements file missing: {0}'.format(_REQUIREMENTS_FILE))
-try:
-    with open(_TESTS_REQUIREMENTS_FILE, 'r') as fp:
-        _TESTS_REQUIREMENTS = fp.read().splitlines()
-except os.FileNotFoundError:
-    print('Tests requirements file missing: {0}'.format(
-        _TESTS_REQUIREMENTS_FILE))
-sys.path.append(_TESTS_LIB_DIR)
 
 
 setup_args['package_dir'] = {'': _LIB_DIR}
 setup_args['packages'] = setuptools.find_packages(_LIB_DIR)
 setup_args['package_data'] = {'': _DATA_LIST}
 setup_args['include_package_data'] = True
-setup_args['install_requires'] = _REQUIREMENTS
-setup_args['setup_requires'] = _TESTS_REQUIREMENTS
 setup_args['test_suite'] = 'nose2.collector.collector'
 
 

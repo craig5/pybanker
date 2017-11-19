@@ -57,7 +57,6 @@ class Banker(object):
 
     def show_schedule(self):
         self.logger.debug('Showing schedule.')
-        import pdb; pdb.set_trace()
 
     @property
     def command(self):
