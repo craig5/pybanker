@@ -17,6 +17,16 @@ FLAKE8_ARGS =
 # This sucks...
 # Shouldn't need a hard-coded path, but my path is messed up.
 SYS_PYTHON_CMD = /usr/bin/python3
+#ifeq ($(TRAVIS), 'true')
+ifdef TRAVIS
+	SYS_PYTHON_CMD = python3
+	PIP_CMD = pip
+	PYTHON_CMD = python
+	NOSE_CMD = nose2
+	FLAKE8_CMD = flake8
+endif
+
+travis-setup: pip_reqs setup_develop
 
 develop: _local_virtualenv pip_reqs setup_develop
 
@@ -37,6 +47,8 @@ setup_develop:
 info:
 	@echo "VENV_DIR = $(VENV_DIR)"
 	@echo "SYS_PYTHON_CMD = $(SYS_PYTHON_CMD)"
+	@echo "PIP_CMD = $(PIP_CMD)"
+	@echo "PYTHON_CMD = $(PYTHON_CMD)"
 	$(PYTHON_CMD) $(SETUP_PY) info
 
 test:
