@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Setup script for pybanker (python3)."""
+# core python packaes
 import os
 import setuptools
-import sys
+# third party packages
+# custom packages
 
 
 setup_args = {
@@ -48,10 +50,6 @@ class Info(setuptools.Command):
         """Really show the info."""
         print('Package Name: {name}'.format(**setup_args))
         print('Version: {version}'.format(**setup_args))
-        print('Scripts: {scripts}'.format(**setup_args))
-        print('Requirements: {install_requires}'.format(**setup_args))
-        print('Tests Lib Dir: {0}'.format(_TESTS_LIB_DIR))
-        print('Test requirments: {setup_requires}'.format(**setup_args))
 
 
 setup_args['cmdclass'] = {'info': Info}

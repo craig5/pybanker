@@ -4,6 +4,8 @@ DEFAULT: help
 
 VENV_DIR = venv
 TESTS_DIR = tests
+LIB_DIR = lib
+SETUP_PY = setup.py
 BIN_DIR = $(VENV_DIR)/bin
 PYTHON_CMD = $(BIN_DIR)/python3
 PIP_CMD = $(BIN_DIR)/pip
@@ -30,25 +32,25 @@ pip_reqs:
 	$(PIP_CMD) install -r dev_requirements.txt
 
 setup_develop:
-	$(PYTHON_CMD) setup.py develop
+	$(PYTHON_CMD) $(SETUP_PY) develop
 
 info:
 	@echo "VENV_DIR = $(VENV_DIR)"
 	@echo "SYS_PYTHON_CMD = $(SYS_PYTHON_CMD)"
-	$(PYTHON_CMD) setup.py info
+	$(PYTHON_CMD) $(SETUP_PY) info
 
 test:
+	$(FLAKE8_CMD) $(FLAKE8_ARGS) $(LIB_DIR)
+	$(FLAKE8_CMD) $(FLAKE8_ARGS) $(TESTS_DIR)
+	$(FLAKE8_CMD) $(FLAKE8_ARGS) $(SETUP_PY)
 	$(NOSE_CMD) $(NOSE_ARGS)
-	#$(PYTHON_CMD) setup.py flake8
-	#$(PYTHON_CMD) setup.py test
-#	$(NOSE_CMD) --verbose
 
 clean:
 	rm -rf $(VENV_DIR)
 	rm -rf build
 	rm -rf dist
 	rm -rf $(TESTS_DIR)/.lib
-	# python setup.py clean
+	# python $(SETUP_PY) clean
 	find lib/work_tools.egg-info -type f -exec rm {} \; || true
 	find lib -name \*\.pyc -exec rm {} \;
 

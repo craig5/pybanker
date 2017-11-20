@@ -12,16 +12,16 @@ import pybanker.shared
 class PyBankerCli(object):
 
     def __init__(self):
-        self.__init_vars__()
-        self.__init_logger__()
-        self.__init_cli__()
+        self._init_vars()
+        self._init_logger()
+        self._init_cli()
 
-    def __init_vars__(self):
+    def _init_vars(self):
         self.global_config = pybanker.shared.GlobalConfig()
         self.logger = None
         self.command = None
 
-    def __init_logger__(self):
+    def _init_logger(self):
         logger_name = self.global_config.base_logger_name
         self.logger = logging.getLogger(logger_name)
         format_string = '[%(levelname)s]'
@@ -35,7 +35,7 @@ class PyBankerCli(object):
         self.logger.addHandler(stdout)
         self.logger.debug('Logger initialized: {0}'.format(logger_name))
 
-    def __init_cli__(self):
+    def _init_cli(self):
         self.logger.debug('Initializing CLI.')
         self.cli = argparse.ArgumentParser(description=__doc__)
         self.cli.add_argument(
@@ -72,9 +72,13 @@ class PyBankerCli(object):
         self.logger.debug('Inside call.')
         self.parse_args()
         bank = pybanker.Banker()
-        bank.main(self.command)
+        bank(self.command)
 
     @staticmethod
     def main():
         cli_obj = PyBankerCli()
         cli_obj()
+
+
+if __name__ == '__main__':
+    pass

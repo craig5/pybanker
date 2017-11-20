@@ -21,17 +21,17 @@ class Banker(object):
     global_config = pybanker.shared.GlobalConfig()
 
     def __init__(self, logger_level=None):
-        self.__init_logger__(logger_level)
-        self.__init_vars__()
+        self._init_logger(logger_level)
+        self._init_vars()
 
-    def __init_vars__(self):
+    def _init_vars(self):
         self.command = None
         self.accounts = None
         self.schedule = None
         self.config = None
         self._data_dir = None
 
-    def __init_logger__(self, logger_level=None):
+    def _init_logger(self, logger_level=None):
         """Initialize logger. (self.logger)"""
         logger_name = self.__class__.__name__
         self.logger = logging.getLogger(logger_name)
@@ -52,8 +52,9 @@ class Banker(object):
 
     def list_accounts(self):
         self.logger.debug('Listing all accounts.')
+        print('Accounts:')
         for account_id, account in self.accounts.items():
-            print(account.get_summary())
+            print('  - {}'.format(account.get_summary()))
 
     def show_schedule(self):
         self.logger.debug('Showing schedule.')
@@ -112,10 +113,9 @@ class Banker(object):
         routine = getattr(self, routine_name)
         return routine
 
-    def main(self, command):
+    def __call__(self, command):
         self.logger.debug('Main running command: {}'.format(command))
         self.load_config()
-
         self.load_accounts()
         self.schedule = pybanker.schedule.Schedule()
         self.schedule.load_data()

@@ -22,6 +22,7 @@ class BaseTestCase(unittest.TestCase):
         self.setup_logger()
         self.test_dir = os.path.dirname(__file__)
         self.base_dir = os.path.dirname(self.test_dir)
+        self.lib_dir = os.path.join(self.base_dir, 'lib')
 
     def setup_logger(self):
         logger_name = self.__class__.__name__
@@ -66,6 +67,15 @@ class Flake8Wrapper(object):
         if num_errors > 0:
             self.logger.error('Num errors: {0}'.format(num_errors))
         return num_errors
+
+    def check_dir(self, dir_name):
+        total_errors = 0
+        for cur_file in os.listdir(dir_name):
+            full = os.path.join(dir_name, cur_file)
+            self.logger.debug('Checking file: {0}'.format(full))
+            total_errors += self.check_file(cur_file, dir_name)
+        self.logger.debug('Total errors: {0}'.format(total_errors))
+        return total_errors
 
 
 if __name__ == '__main__':
