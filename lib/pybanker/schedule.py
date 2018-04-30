@@ -9,47 +9,53 @@ import yaml
 import pybanker.shared
 
 
-class Schedule(object):
+class Schedule(dict):
+    config = pybanker.shared.GlobalConfig()
 
     def __init__(self):
-        self.__init_vars__()
-        self.__init_logger__()
+        self._init_logger()
+        self.load_items()
 
-    def __init_vars__(self):
-        self.items = dict()
-
-    def __init_logger__(self):
-        self.global_config = pybanker.shared.GlobalConfig()
+    def _init_logger(self):
         logger_name = '.'.join([
-            self.global_config.package_name,
+            self.config.package_name,
             self.__class__.__name__
         ])
         self.logger = logging.getLogger(logger_name)
 
-    @property
-    def schedule_file(self):
-        return self.global_config.schedule_file
-
-    def load_data(self):
-        self.logger.debug('Loading schedule: {0})'.format(self.schedule_file))
-        with open(self.schedule_file, 'r') as fp:
+    def load_items(self):
+        file_name = self.config.schedule_file
+        self.logger.debug('Loading schedule: {0})'.format(file_name))
+        with open(file_name, 'r') as fp:
             raw = yaml.load(fp)
         for cur_name, cur_data in raw['items'].items():
-            self.items[cur_name] = ScheduleItem(cur_name, cur_data)
+            self[cur_name] = ScheduleItem(cur_name, cur_data)
+
+    def show_summary(self):
+        self.logger.debug('Showing schedule summary.')
+        data = dict()
+        data['Schedule'] = list()
+        for cur in self.values():
+            data['Schedule'].append(cur.get_summary())
+        print(yaml.dump(
+            data,
+            indent=2,
+            default_flow_style=False
+        ))
 
 
 class ScheduleItem(object):
 
     def __init__(self, name, data):
-        self.__init_logger__()
+        self._init_logger()
         self.name = name
-        self.__load_data__(data)
+        self._load_data(data)
 
-    def __init_logger__(self):
+    def _init_logger(self):
         logger_name = self.__class__.__name__
         self.logger = logging.getLogger(logger_name)
 
-    def __load_data__(self, data):
+    def _load_data(self, data):
         self.payee = data['payee']
         self.start_date = data['start-date']
         self.frequency = data['frequency']
@@ -65,4 +71,7 @@ class ScheduleItem(object):
         """Show a short summary of the account."""
         output = self.name
         return output
-# End of file.
+
+
+if __name__ == '__main__':
+    pass

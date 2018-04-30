@@ -29,15 +29,15 @@ class GlobalConfig(object):
     ]
 
     def __init__(self):
-        self.__init_vars__()
+        self._init_vars()
         # TODO add kwarg for "config_file" to override default
         self.config_file = self.default_config_file
-        self.__load_config_file__()
+        self._load_config_file()
 
-    def __init_vars__(self):
+    def _init_vars(self):
         self._data_dir = None
 
-    def __load_config_file__(self):
+    def _load_config_file(self):
         self.conf = configparser.ConfigParser()
         self.conf.read(self.config_file)
 
@@ -52,6 +52,10 @@ class GlobalConfig(object):
     @property
     def schedule_file(self):
         return os.path.join(self.data_dir, 'schedule.yaml')
+
+    @property
+    def accounts_file(self):
+        return os.path.join(self.data_dir, 'accounts.yaml')
 
 
 if __name__ == '__main__':
