@@ -20,6 +20,7 @@ class BaseTestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setup_logger()
+        self.package_name = 'pybanker'
         self.test_dir = os.path.dirname(__file__)
         self.base_dir = os.path.dirname(self.test_dir)
         self.lib_dir = os.path.join(self.base_dir, 'lib')

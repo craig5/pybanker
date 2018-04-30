@@ -2,14 +2,11 @@
 Main class that wraps pybanker functionality
 """
 # core python libraries
-import configparser
 import logging
-import os
 # third party libraries
-import yaml
 # custom libraries
 import pybanker.shared
-import pybanker.account
+import pybanker.accounts
 import pybanker.schedule
 
 
@@ -26,10 +23,8 @@ class Banker(object):
 
     def _init_vars(self):
         self.command = None
-        self.accounts = None
-        self.schedule = None
-        self.config = None
-        self._data_dir = None
+        self._schedule = None
+        self._accounts = None
 
     def _init_logger(self, logger_level=None):
         """Initialize logger. (self.logger)"""
@@ -37,66 +32,23 @@ class Banker(object):
         self.logger = logging.getLogger(logger_name)
         self.logger.debug('Logger initialized: {0}'.format(logger_name))
 
-    def load_accounts(self):
-        self.logger.debug('Loading accounts: {0}'.format(self.accounts_file))
-        self.accounts = dict()
-        with open(self.accounts_file, 'r') as fp:
-            accounts = yaml.load(fp)
-        for account_num, raw_account in accounts.items():
-            new_account = pybanker.account.Account(account_num, raw_account)
-            if new_account.short_name in self.accounts:
-                self.logger.error('Duplicate account: {}'.format(
-                    new_account.short_name))
-                continue
-            self.accounts[new_account.short_name] = new_account
+    @property
+    def accounts(self):
+        if self._accounts is None:
+            self._accounts = pybanker.accounts.Accounts()
+        return self._accounts
+
+    @property
+    def schedule(self):
+        if self._schedule is None:
+            self._schedule = pybanker.schedule.Schedule()
+        return self._schedule
 
     def list_accounts(self):
-        self.logger.debug('Listing all accounts.')
-        print('Accounts:')
-        for account_id, account in self.accounts.items():
-            print('  - {}'.format(account.get_summary()))
+        self.accounts.show_summary()
 
     def show_schedule(self):
-        self.logger.debug('Showing schedule.')
-
-    @property
-    def command(self):
-        return self._command
-
-    @command.setter
-    def command(self, value):
-        self._command = value
-
-    @property
-    def accounts_file(self):
-        return os.path.join(self.data_dir, 'accounts.yaml')
-
-    @property
-    def schedule_file(self):
-        return os.path.join(self.data_dir, 'schedule.yaml')
-
-    @property
-    def data_dir(self):
-        return self._data_dir
-
-    @data_dir.setter
-    def data_dir(self, value):
-        if not value.startswith('/'):
-            home_dir = os.path.expanduser('~')
-            value = os.path.join(home_dir, value)
-        self._data_dir = value
-
-    def load_config(self):
-        """
-        """
-        conf_file = self.global_config.default_config_file
-        self.logger.debug('Loading config: {0}'.format(conf_file))
-        self.config = configparser.ConfigParser()
-        with open(conf_file, 'r') as fp:
-            self.config.readfp(fp)
-        def_sec = 'default'
-        self.data_dir = self.config.get(def_sec, 'data_dir')
-        self.logger.debug('Data dir: {0}'.format(self.data_dir))
+        self.schedule.show_summary()
 
     def get_command_routine(self, command):
         """
@@ -115,10 +67,6 @@ class Banker(object):
 
     def __call__(self, command):
         self.logger.debug('Main running command: {}'.format(command))
-        self.load_config()
-        self.load_accounts()
-        self.schedule = pybanker.schedule.Schedule()
-        self.schedule.load_data()
         (self.get_command_routine(command))()
 
 
