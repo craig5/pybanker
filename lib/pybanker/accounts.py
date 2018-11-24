@@ -67,7 +67,10 @@ class _SingleAccount(object):
         self.active = data['active']
         self.visible = data['visible']
         self.account_end = data.get('account_end', None)
-        self.short_name = data['short_name']
+        try:
+            self.short_name = data['short_name']
+        except KeyError:
+            self.short_name = self.name
 
     def __str__(self):
         return self.name
