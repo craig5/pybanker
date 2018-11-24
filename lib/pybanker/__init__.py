@@ -28,7 +28,7 @@ class Banker(object):
 
     def _init_logger(self, logger_level=None):
         """Initialize logger. (self.logger)"""
-        logger_name = self.__class__.__name__
+        logger_name = self.global_config.build_logger_name(self)
         self.logger = logging.getLogger(logger_name)
         self.logger.debug('Logger initialized: {0}'.format(logger_name))
 

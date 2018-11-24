@@ -16,7 +16,8 @@ FLAKE8_CMD = $(BIN_DIR)/flake8
 FLAKE8_ARGS =
 # This sucks...
 # Shouldn't need a hard-coded path, but my path is messed up.
-SYS_PYTHON_CMD = /usr/bin/python3
+SYS_PYTHON_CMD = $(shell which python3)
+
 #ifeq ($(TRAVIS), 'true')
 ifdef TRAVIS
 	SYS_PYTHON_CMD = python3
@@ -34,7 +35,7 @@ develop: _local_virtualenv pip_reqs setup_develop
 #	sudo apt-get install python3-venv
 _local_virtualenv:
 	$(SYS_PYTHON_CMD) -m venv $(VENV_DIR)
-	$(PIP_CMD) install --upgrade pip
+	$(PIP_CMD) install --upgrade pip setuptools
 
 pip_reqs:
 	$(PIP_CMD) install -r tests/requirements.txt
@@ -63,7 +64,7 @@ clean:
 	rm -rf dist
 	rm -rf $(TESTS_DIR)/.lib
 	# python $(SETUP_PY) clean
-	find lib/work_tools.egg-info -type f -exec rm {} \; || true
+	find .  -name *.egg-info -depth -exec rm -rf {} \; || true
 	find lib -name \*\.pyc -exec rm {} \;
 
 help:
