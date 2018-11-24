@@ -3,7 +3,6 @@
 Setup script for pybanker (python3).
 """
 # core python packaes
-import os
 import setuptools
 # third party packages
 # custom packages
