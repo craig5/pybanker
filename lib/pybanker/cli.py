@@ -74,10 +74,10 @@ class PyBankerCli(object):
         bank = pybanker.Banker()
         bank(self.command)
 
-    @staticmethod
-    def main():
-        cli_obj = PyBankerCli()
-        cli_obj()
+
+def main():
+    cli_obj = PyBankerCli()
+    cli_obj()
 
 
 if __name__ == '__main__':

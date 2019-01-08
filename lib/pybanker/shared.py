@@ -23,9 +23,11 @@ class GlobalConfig(object):
         '.{0}'.format(package_name),
         'config.ini'
     )
+    # The first one ([0]) is the default.
     commands = [
-        {'option': 'list-accounts', 'routine': 'list_accounts'},
-        {'option': 'show-schedule', 'routine': 'show_schedule'}
+        {'option': 'show-summary', 'routine': 'show_summary'},
+        {'option': 'show-shedule', 'routine': 'show_schedule'},
+        {'option': 'list-accounts', 'routine': 'list_accounts'}
     ]
 
     def __init__(self):

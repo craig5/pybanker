@@ -50,7 +50,14 @@ class Banker(object):
     def show_schedule(self):
         self.schedule.show_summary()
 
-    def get_command_routine(self, command):
+    def show_summary(self):
+        """
+        Show a summary of: accounts, schedule and "errors".
+        """
+        self.list_accounts()
+        self.show_schedule()
+
+    def _get_command_routine(self, command):
         """
         """
         command_lookup = dict()
@@ -65,9 +72,16 @@ class Banker(object):
         routine = getattr(self, routine_name)
         return routine
 
+    def verify_data(self):
+        """
+        """
+        # TODO verify that required data files exist and are in the correct format
+        pass
+
     def __call__(self, command):
         self.logger.debug('Main running command: {}'.format(command))
-        (self.get_command_routine(command))()
+        self.verify_data()
+        (self._get_command_routine(command))()
 
 
 if __name__ == '__main__':
