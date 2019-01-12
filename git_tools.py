@@ -1,8 +1,6 @@
 """Routines to work with git data."""
 # core python packaes
-import os
 import re
-import setuptools
 import subprocess
 # third party packages
 # custom packages
@@ -32,8 +30,8 @@ def version_from_tag():
     stdout = stdout.decode('utf-8').rstrip('\n')
     version = stdout
     version = version.replace('-dirty', '+dirty')
-    version = re.sub('-g\w{7}', '', version)
-    version = re.sub('-(\d+)', r'.post\1', version)
+    version = re.sub(r'-g(\w{7})', '', version)
+    version = re.sub(r'-(\d+)', r'.post\1', version)
     # remove the leading 'v'
     return version[1:]
 

@@ -15,6 +15,9 @@ class TestComments(utils_for_tests.BaseTestCase):
     def tearDown(self):
         pass
 
+    def test_noop(self):
+        pass
+
 
 if __name__ == '__main__':
     pass

@@ -4,27 +4,24 @@ DEFAULT: help
 
 VENV_DIR = venv
 TESTS_DIR = tests
-LIB_DIR = lib
 SETUP_PY = setup.py
 BIN_DIR = $(VENV_DIR)/bin
 PYTHON_CMD = $(BIN_DIR)/python3
-PIP_CMD = $(BIN_DIR)/pip
+PIP_CMD = $(BIN_DIR)/pip3
 #
-NOSE_CMD = $(BIN_DIR)/nose2
-NOSE_ARGS =
+PYTEST_CMD = $(BIN_DIR)/pytest
+PYTEST_ARGS =
 FLAKE8_CMD = $(BIN_DIR)/flake8
 FLAKE8_ARGS =
-# This sucks...
-# Shouldn't need a hard-coded path, but my path is messed up.
+#
 SYS_PYTHON_CMD = $(shell which python3)
 
-#ifeq ($(TRAVIS), 'true')
-ifdef TRAVIS
-	SYS_PYTHON_CMD = python3
-	PIP_CMD = pip
-	PYTHON_CMD = python
-	NOSE_CMD = nose2
-	FLAKE8_CMD = flake8
+ifeq ("$(TRAVIS)", "true")
+$(warning "Resetting commands for travis.")
+PIP_CMD = pip3
+PYTHON_CMD = python3
+PYTEST_CMD = pytest
+FLAKE8_CMD = flake8
 endif
 
 travis-setup: pip_reqs setup_develop
@@ -35,12 +32,13 @@ develop: _local_virtualenv pip_reqs setup_develop
 #	sudo apt-get install python3-venv
 _local_virtualenv:
 	$(SYS_PYTHON_CMD) -m venv $(VENV_DIR)
-	$(PIP_CMD) install --upgrade pip setuptools
 
 pip_reqs:
-	$(PIP_CMD) install -r tests/requirements.txt
-	$(PIP_CMD) install -r requirements.txt
-	$(PIP_CMD) install -r dev_requirements.txt
+	$(PIP_CMD) install --upgrade pip
+	$(PIP_CMD) install --progress-bar off --upgrade setuptools
+	$(PIP_CMD) install --progress-bar off -r tests/requirements.txt
+	$(PIP_CMD) install --progress-bar off -r requirements.txt
+	$(PIP_CMD) install --progress-bar off -r dev_requirements.txt
 
 setup_develop:
 	$(PYTHON_CMD) $(SETUP_PY) develop
@@ -53,10 +51,9 @@ info:
 	$(PYTHON_CMD) $(SETUP_PY) info
 
 test:
-	$(FLAKE8_CMD) $(FLAKE8_ARGS) $(LIB_DIR)
-	$(FLAKE8_CMD) $(FLAKE8_ARGS) $(TESTS_DIR)
-	$(FLAKE8_CMD) $(FLAKE8_ARGS) $(SETUP_PY)
-	$(NOSE_CMD) $(NOSE_ARGS)
+	$(PIP_CMD) list --outdated
+	$(FLAKE8_CMD) $(FLAKE8_ARGS)
+	$(PYTEST_CMD) $(PYTEST_ARGS)
 
 clean:
 	rm -rf $(VENV_DIR)
@@ -69,6 +66,8 @@ clean:
 
 help:
 	@echo "Choose from the following:"
-	@echo "	develop		Create a virtualenv (in $(VENV_DIR))"
-	@echo "	clean		Delete various development files and dirs."
-	@echo "	help		This message."
+	@echo "	develop	Create a virtualenv (in $(VENV_DIR))."
+	@echo "	info	Show various info."
+	@echo "	test	Run unit PEP8 and unit tests."
+	@echo "	clean	Delete various development files and dirs."
+	@echo "	help	This message."
