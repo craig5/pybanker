@@ -27,7 +27,7 @@ class Schedule(dict):
         file_name = self.config.schedule_file
         self.logger.debug('Loading schedule: {0}'.format(file_name))
         with open(file_name, 'r') as fp:
-            raw = yaml.load(fp)
+            raw = yaml.safe_load(fp)
         for cur_name, cur_data in raw['items'].items():
             self[cur_name] = ScheduleItem(cur_name, cur_data)
 

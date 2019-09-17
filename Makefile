@@ -26,7 +26,7 @@ endif
 
 travis-setup: pip_reqs setup_develop
 
-develop: _local_virtualenv pip_reqs setup_develop
+dev: _local_virtualenv pip_reqs setup_develop
 
 # To install venv on ubuntu 14.04:
 #	sudo apt-get install python3-venv
@@ -55,6 +55,9 @@ test:
 	$(FLAKE8_CMD) $(FLAKE8_ARGS)
 	$(PYTEST_CMD) $(PYTEST_ARGS)
 
+clean_cover:
+	find . -depth -name \*.cover -exec rm {} \;
+
 clean:
 	rm -rf $(VENV_DIR)
 	rm -rf build
@@ -66,7 +69,7 @@ clean:
 
 help:
 	@echo "Choose from the following:"
-	@echo "	develop	Create a virtualenv (in $(VENV_DIR))."
+	@echo "	dev	Create a virtualenv (in $(VENV_DIR))."
 	@echo "	info	Show various info."
 	@echo "	test	Run unit PEP8 and unit tests."
 	@echo "	clean	Delete various development files and dirs."
