@@ -1,0 +1,18 @@
+Random thoughts on design:
+
+transactions
+	transaction id
+	- unique id: date with microseconds
+	- payee
+	- splits
+		category
+		note
+		amount
+	- receipts (relative file names, with contents SHA)
+
+receipts index
+	file name
+	transaction id
+	contents sha
+	file created date/time
+	file last mod date/time

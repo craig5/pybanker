@@ -13,6 +13,7 @@ PYTEST_CMD = $(BIN_DIR)/pytest
 PYTEST_ARGS =
 FLAKE8_CMD = $(BIN_DIR)/flake8
 FLAKE8_ARGS =
+PUR_CMD = $(BIN_DIR)/pur
 #
 SYS_PYTHON_CMD = $(shell which python3)
 
@@ -36,9 +37,15 @@ _local_virtualenv:
 pip_reqs:
 	$(PIP_CMD) install --upgrade pip
 	$(PIP_CMD) install --progress-bar off --upgrade setuptools
+	$(PIP_CMD) install --progress-bar off --upgrade pur
 	$(PIP_CMD) install --progress-bar off -r tests/requirements.txt
 	$(PIP_CMD) install --progress-bar off -r requirements.txt
 	$(PIP_CMD) install --progress-bar off -r dev_requirements.txt
+
+update-reqs:
+	$(PUR_CMD) --requirement requirements.txt
+	$(PUR_CMD) --requirement tests/requirements.txt
+	$(PUR_CMD) --requirement dev_requirements.txt
 
 setup_develop:
 	$(PYTHON_CMD) $(SETUP_PY) develop
@@ -69,8 +76,9 @@ clean:
 
 help:
 	@echo "Choose from the following:"
-	@echo "	dev	Create a virtualenv (in $(VENV_DIR))."
-	@echo "	info	Show various info."
-	@echo "	test	Run unit PEP8 and unit tests."
-	@echo "	clean	Delete various development files and dirs."
-	@echo "	help	This message."
+	@echo "	dev		Create a virtualenv (in $(VENV_DIR))."
+	@echo "	info		Show various info."
+	@echo "	test		Run unit PEP8 and unit tests."
+	@echo "	update-reqs	Update requirements files (using pur)."
+	@echo "	clean		Delete various development files and dirs."
+	@echo "	help		This message."

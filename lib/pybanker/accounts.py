@@ -45,13 +45,13 @@ class Accounts(collections.OrderedDict):
         super().__init__()
         self.config = pybanker.shared.GlobalConfig()
         self.logger = self.config.build_logger(self)
-        self._load_accounts()
+        self._accounts = None
 
     @property
     def data_directory(self):
         return self.config.accounts_directory
 
-    def _load_accounts(self):
+    def _get_accounts(self):
         self.logger.debug(f'Loading accounts: {self.data_directory}')
         try:
             contents = os.listdir(self.data_directory)
@@ -59,23 +59,30 @@ class Accounts(collections.OrderedDict):
             msg = f'Account directory not found: {self.data_directory}'
             raise AccountConfigException(msg)
         self.logger.debug(f'Elements in accounts dir: {len(contents)}')
-        self.accounts = dict()
+        accounts = dict()
         for cur in contents:
             full = os.path.join(self.data_directory, cur)
             new_account = _AccountItem(full)
-            self.accounts[new_account.short_name] = new_account
+            accounts[new_account.short_name] = new_account
             self.logger.debug('Added account: {}'.format(new_account.name))
+        return accounts
+
+    @property
+    def accounts(self):
+        if self._accounts is None:
+            self._accounts = self._get_accounts()
+        return self._accounts
 
     def verify_data(self):
         self.logger.debug('Verifying account data.')
-        for cur in self.values():
-            cur.verify_data()
+        for cur_name, cur_obj in self.accounts.items():
+            cur_obj.verify_data()
 
     def show_summary(self):
         print('Accounts')
         print('========')
-        for cur in self.values():
-            print(cur.get_summary_output(), end='')
+        for cur_name, cur_obj in self.accounts.items():
+            print(cur_obj.get_summary_output())
 
 
 class _AccountItem(collections.UserDict):
@@ -130,19 +137,6 @@ class _AccountItem(collections.UserDict):
         return data
 
     def _calc_statements_directory(self):
-        """
-        First priority is to use the dir defined in the index file.
-        If there is a "statements" dir in the data dir, use that.
-        """
-        # TODO show an error if BOTH a subdir and config entry exist?
-        try:
-            cfg_dir = self['statements_directory']
-            cfg_full = os.path.join(self.home_dir, cfg_dir)
-            if os.path.exists(cfg_full):
-                return cfg_full
-            self.logger.warning(f'Config statements dir does not exist: {cfg_full}')
-        except KeyError:
-            self.logger.debug('No statments dir in config.')
         subdir = os.path.join(self.data_directory, 'statements')
         if os.path.exists(subdir):
             self.logger.debug(f'Using subdir for statements: {subdir}')
@@ -269,19 +263,29 @@ class _AccountItem(collections.UserDict):
             if cur_key in self.statements:
                 raise Exception(f'Duplicate statements: {self.name}')
             self.statements[cur_key] = item
-        self._load_null_statements()
+        for cur in self._get_null_statements():
+            self.statements[cur] = None
+        for cur in self._get_known_missing_statements():
+            self.statements[cur] = None
 
-    def _load_null_statements(self):
-        nulls = self.statements_index.get('null_statements', list())
-        self.logger.debug(f'Found null statements: {self.name}:{len(nulls)}')
-        self.logger.debug(f'Nulls: {nulls}')
-        for cur in nulls:
+    def _convert_raw_to_datetimes(self, key_name):
+        raw_list = self.statements_index.get(key_name, list())
+        converted_list = list()
+        self.logger.debug(f'Found {key_name} statements: {self.name}:{len(raw_list)}')
+        for cur in raw_list:
             if type(cur) == int:
                 cur = str(cur)
-            self.logger.debug(f'Adding null: {self.name}:{cur}')
+            self.logger.debug(f'Adding {key_name}: {self.name}:{cur}')
             dt_date = self._parse_date_file_name(cur)
             cur_key = dt_date.isoformat()
-            self.statements[cur_key] = None
+            converted_list.append(cur_key)
+        return converted_list
+
+    def _get_null_statements(self):
+        return self._convert_raw_to_datetimes('null_statements')
+
+    def _get_known_missing_statements(self):
+        return self._convert_raw_to_datetimes('known_missing_statements')
 
     def _verify_statements(self):
         if self.is_cash():
@@ -316,11 +320,16 @@ class _AccountItem(collections.UserDict):
                     cur_date = statement_dates.pop(0)
                     self.logger.debug(f'Found statement: {cur_date}')
                 else:
-                    self.logger.info('No statements remaining: {cur_date}')
+                    self.logger.info(f'No statements remaining: {cur_date}')
             cur_date = add_month(cur_date)
         if len(self.missing_statements) > 0:
+            for cur in self.missing_statements:
+                print(cur)
             raise AccountConfigException(
                 f'Missing statements: {self.name}: {self.missing_statements}')
+
+    def verify_data(self):
+        raise NotImplementedError('Verify data is not done in accounts item.')
 
 
 if __name__ == '__main__':

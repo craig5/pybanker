@@ -26,7 +26,7 @@ class GlobalConfig(object):
     # The first one ([0]) is the default.
     commands = [
         {'option': 'show-summary', 'routine': 'show_summary'},
-        {'option': 'show-shedule', 'routine': 'show_schedule'},
+        {'option': 'show-schedule', 'routine': 'show_schedule'},
         {'option': 'list-accounts', 'routine': 'list_accounts'}
     ]
 
