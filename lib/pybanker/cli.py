@@ -34,6 +34,7 @@ class PyBankerCli(object):
         self.logger.setLevel(self.global_config.logger_level)
         self.logger.addHandler(stdout)
         self.logger.debug('Logger initialized: {0}'.format(logger_name))
+        logging.getLogger('').setLevel(self.global_config.logger_level)
 
     def _init_cli(self):
         self.logger.debug('Initializing CLI.')
@@ -65,6 +66,7 @@ class PyBankerCli(object):
             for handler in self.logger.handlers:
                 handler.setLevel(level)
             self.logger.debug('Logger level reset to: {}'.format(level_name))
+            logging.getLogger('').setLevel(level)
         self.command = self.args.command
         self.logger.debug('Command: {}'.format(self.command))
 
@@ -74,10 +76,10 @@ class PyBankerCli(object):
         bank = pybanker.Banker()
         bank(self.command)
 
-    @staticmethod
-    def main():
-        cli_obj = PyBankerCli()
-        cli_obj()
+
+def main():
+    cli_obj = PyBankerCli()
+    cli_obj()
 
 
 if __name__ == '__main__':

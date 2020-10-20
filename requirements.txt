@@ -1,1 +1,2 @@
-PyYAML==4.2b2
+PyYAML==5.3.1
+python-dateutil==2.8.1

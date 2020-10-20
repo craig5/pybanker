@@ -8,6 +8,8 @@ import logging
 import pybanker.shared
 import pybanker.accounts
 import pybanker.schedule
+import pybanker.receipts
+import pybanker.transactions
 
 
 class UndefinedCommandException(Exception):
@@ -15,34 +17,32 @@ class UndefinedCommandException(Exception):
 
 
 class Banker(object):
-    global_config = pybanker.shared.GlobalConfig()
 
     def __init__(self, logger_level=None):
-        self._init_logger(logger_level)
+        self.config = pybanker.shared.GlobalConfig()
+        self.logger = self.config.build_logger(self)
         self._init_vars()
+        self.load_data()
 
     def _init_vars(self):
         self.command = None
         self._schedule = None
         self._accounts = None
+        self._receipts = None
+        self._transactions = None
 
     def _init_logger(self, logger_level=None):
         """Initialize logger. (self.logger)"""
-        logger_name = self.global_config.build_logger_name(self)
+        logger_name = self.config.build_logger_name(self)
         self.logger = logging.getLogger(logger_name)
         self.logger.debug('Logger initialized: {0}'.format(logger_name))
 
-    @property
-    def accounts(self):
-        if self._accounts is None:
-            self._accounts = pybanker.accounts.Accounts()
-        return self._accounts
-
-    @property
-    def schedule(self):
-        if self._schedule is None:
-            self._schedule = pybanker.schedule.Schedule()
-        return self._schedule
+    def load_data(self):
+        self.accounts = pybanker.accounts.Accounts()
+        self.schedule = pybanker.schedule.Schedule()
+        self.receipts = pybanker.receipts.Receipts()
+        self.transactions = pybanker.transactions.Transactions()
+        self.transactions.link_receipts(self.receipts)
 
     def list_accounts(self):
         self.accounts.show_summary()
@@ -50,11 +50,18 @@ class Banker(object):
     def show_schedule(self):
         self.schedule.show_summary()
 
-    def get_command_routine(self, command):
+    def show_summary(self):
+        """
+        Show a summary of: accounts, schedule and "errors".
+        """
+        self.list_accounts()
+        self.show_schedule()
+
+    def _get_command_routine(self, command):
         """
         """
         command_lookup = dict()
-        for cur in self.global_config.commands:
+        for cur in self.config.commands:
             command_lookup[cur['option']] = cur['routine']
         routine_name = command_lookup.get(command, None)
         self.logger.debug('Routine name: {}'.format(routine_name))
@@ -65,9 +72,20 @@ class Banker(object):
         routine = getattr(self, routine_name)
         return routine
 
+    def verify_data(self):
+        """
+        """
+        # TODO verify that required data files exist and are in the correct format
+        # TODO verify that every receipt has a corresponding transaction
+        # self.receipts.receipts
+        # TODO move all verify steps to when the data is loaded
+        self.transactions.verify_data()
+        self.receipts.verify_data()
+
     def __call__(self, command):
         self.logger.debug('Main running command: {}'.format(command))
-        (self.get_command_routine(command))()
+        self.verify_data()
+        (self._get_command_routine(command))()
 
 
 if __name__ == '__main__':
