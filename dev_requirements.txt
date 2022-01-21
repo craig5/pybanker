@@ -1,2 +1,2 @@
-iPython==7.18.1
+iPython==7.31.1
 ipdb==0.13.4
