@@ -7,36 +7,14 @@ import datetime
 import os
 import re
 # third party packages
-import dateutil.relativedelta
 import yaml
 # custom packages
 import pybanker.shared
+import pybanker.frequency_utils
 
 
 class AccountConfigException(Exception):
     pass
-
-
-def add_month(date):
-    return date + dateutil.relativedelta.relativedelta(months=1)
-
-
-class MonthlyIterator(object):
-
-    def __init__(self, start_date):
-        self.start_date = start_date
-
-    def __iter__(self):
-        self.current_date = self.start_date
-        self.today_date = datetime.date.today()
-        return self
-
-    def __next__(self):
-        self.current_date = \
-            self.current_date + dateutil.relativedelta.relativedelta(months=1)
-        if self.current_date > self.today_date:
-            raise StopIteration
-        return self.current_date
 
 
 class Accounts(collections.OrderedDict):
@@ -136,8 +114,14 @@ class _AccountItem(collections.UserDict):
             raise AccountConfigException(msg)
         return data
 
+    @property
+    def statements_base_dir(self):
+        if self.type == 'payroll':
+            return 'pay-stubs'
+        return 'statements'
+
     def _calc_statements_directory(self):
-        subdir = os.path.join(self.data_directory, 'statements')
+        subdir = os.path.join(self.data_directory, self.statements_base_dir)
         if os.path.exists(subdir):
             self.logger.debug(f'Using subdir for statements: {subdir}')
             return subdir
@@ -218,6 +202,7 @@ class _AccountItem(collections.UserDict):
             indent=2,
             default_flow_style=False
         )
+        output = output.rstrip('\n')
         return output
 
     def _verify_core_data(self):
@@ -227,14 +212,16 @@ class _AccountItem(collections.UserDict):
                 fails.append(f'Missing required key ({self.name}): {req}')
         if 'statement_period' in self.get_required_fields():
             period = self.get('statement_period', None)
-            if period != 'monthly':
-                # TODO add suppport for more than monthly
+            if not pybanker.frequency_utils.is_supported_type(period):
                 fails.append(f'Unsupported statement period: {period}')
         if len(fails) > 0:
             raise AccountConfigException(fails)
 
     def _parse_date_file_name(self, name):
-        return self._parse_date_string(name.rstrip('.pdf'))
+        try:
+            return self._parse_date_string(name.rstrip('.pdf'))
+        except Exception:
+            raise
 
     def _parse_date_string(self, date_string):
         for name_format in self.name_formats:
@@ -273,10 +260,18 @@ class _AccountItem(collections.UserDict):
         converted_list = list()
         self.logger.debug(f'Found {key_name} statements: {self.name}:{len(raw_list)}')
         for cur in raw_list:
-            if type(cur) == int:
-                cur = str(cur)
             self.logger.debug(f'Adding {key_name}: {self.name}:{cur}')
-            dt_date = self._parse_date_file_name(cur)
+            # Data cleanup, first...
+            if isinstance(cur, int):
+                cur = str(cur)
+            # Convert to datetime, if needed.
+            if isinstance(cur, str):
+                dt_date = self._parse_date_file_name(cur)
+            elif isinstance(cur, datetime.date):
+                dt_date = cur
+            else:
+                # TODO better exception
+                raise Exception(f'Could not convert to dt: {cur}')
             cur_key = dt_date.isoformat()
             converted_list.append(cur_key)
         return converted_list
@@ -292,41 +287,17 @@ class _AccountItem(collections.UserDict):
             return
         if self.has_shared_statements():
             return
-        supported_types = ['monthly']
-        period = self['statement_period']
-        if period not in supported_types:
-            raise AccountConfigException(f'Unsupported statement period: {period}')
         statement_dates = list()
         for cur in sorted(self.statements.keys()):
             statement_dates.append(datetime.date.fromisoformat(cur))
-        today = datetime.date.today()
-        cur_date = self['start_date']
-        self.missing_statements = list()
-        while cur_date <= today:
-            self.logger.debug(f'Checking statement date: {self.name}:{cur_date}')
-            try:
-                delta = statement_dates[0] - cur_date
-            except IndexError:
-                # If there are no more statements,
-                # then take the delta between the "desired date"
-                # (aka "cur_date") and today.
-                delta = cur_date - today
-            self.logger.debug(f'Data delta: {delta}')
-            if delta.days < -5 or delta.days > 30:
-                self.missing_statements.append(cur_date)
-                self.logger.error(f'Missing statement: {self.name}: {cur_date}')
-            else:
-                if len(statement_dates) > 0:
-                    cur_date = statement_dates.pop(0)
-                    self.logger.debug(f'Found statement: {cur_date}')
-                else:
-                    self.logger.info(f'No statements remaining: {cur_date}')
-            cur_date = add_month(cur_date)
-        if len(self.missing_statements) > 0:
-            for cur in self.missing_statements:
-                print(cur)
+        freq_helper = pybanker.frequency_utils.FrequencyHelper(
+            self['statement_period'], statement_dates, self['start_date'])
+        self.missing_statement_dates = freq_helper.find_missing_statement_dates()
+        if len(self.missing_statement_dates) > 0:
+            for cur in self.missing_statement_dates:
+                self.logger.error(f'Missing statement: {self.name}: {cur}')
             raise AccountConfigException(
-                f'Missing statements: {self.name}: {self.missing_statements}')
+                f'Missing statements: {self.name}: {self.missing_statement_dates}')
 
     def verify_data(self):
         raise NotImplementedError('Verify data is not done in accounts item.')
