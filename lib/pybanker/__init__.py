@@ -55,6 +55,7 @@ class Banker(object):
         Show a summary of: accounts, schedule and "errors".
         """
         self.list_accounts()
+        print('='*50)
         self.show_schedule()
 
     def _get_command_routine(self, command):
