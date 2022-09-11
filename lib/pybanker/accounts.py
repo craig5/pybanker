@@ -235,7 +235,7 @@ class _AccountItem(collections.UserDict):
                 int(date_matches.group(3))
             )
             return dt_date
-        raise AccountConfigException(f'Cannot parse date string: {date_string}')
+        raise AccountConfigException(f'Cannot parse date string: {self.name} -> {date_string}')
 
     def _load_statements(self):
         self.statements = dict()
@@ -296,8 +296,9 @@ class _AccountItem(collections.UserDict):
         if len(self.missing_statement_dates) > 0:
             for cur in self.missing_statement_dates:
                 self.logger.error(f'Missing statement: {self.name}: {cur}')
-            raise AccountConfigException(
-                f'Missing statements: {self.name}: {self.missing_statement_dates}')
+            msg = 'Missing statements: {0}: {1}'.format(
+                self.name, self.missing_statement_dates)
+            raise AccountConfigException(msg)
 
     def verify_data(self):
         raise NotImplementedError('Verify data is not done in accounts item.')
