@@ -10,9 +10,9 @@ import pybanker.shared
 
 
 class Schedule(dict):
-    config = pybanker.shared.GlobalConfig()
 
     def __init__(self):
+        self.config = pybanker.shared.GlobalConfig()
         self._init_logger()
         self.load_items()
 

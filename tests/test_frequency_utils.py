@@ -1,6 +1,7 @@
 #!/usr/bin/env python3 -B
 """Test for pybanker.frequency_utils class and routines."""
 # python core packages
+import configparser
 import datetime
 # third party packages
 import pytest
@@ -19,7 +20,15 @@ def mocked_today(mocker):
     return mocked_today
 
 
-def test_frequency_helper_init_good(mocked_today):
+@pytest.fixture
+def mock_get_config_object(mocker):
+    mock_get_config = mocker.patch.object(pybanker.shared.GlobalConfig, '_get_config_object')
+    config = configparser.ConfigParser()
+    mock_get_config.return_value = config
+    return mock_get_config
+
+
+def test_frequency_helper_init_good(mocked_today, mock_get_config_object):
     start_dt = datetime.date(2021, 11, 1)
     freq_helper = pybanker.frequency_utils.FrequencyHelper(
         'monthly', [], start_dt)
@@ -28,7 +37,7 @@ def test_frequency_helper_init_good(mocked_today):
     assert freq_helper.days_delta == 30
 
 
-def test_frequency_helper_init_bad_frequency():
+def test_frequency_helper_init_bad_frequency(mock_get_config_object):
     start_dt = datetime.date(2021, 11, 1)
     bad_freq = 'foo'
     with pytest.raises(pybanker.frequency_utils.UnknownFrequency) as exc:
@@ -36,7 +45,7 @@ def test_frequency_helper_init_bad_frequency():
     assert exc.value.args[0] == f'Unknown frequency: {bad_freq}'
 
 
-def test_frequency_helper_pop_latest_doc(mocked_today):
+def test_frequency_helper_pop_latest_doc(mocked_today, mock_get_config_object):
     statement_dts = [
         datetime.date(2021, 2, 19),
         datetime.date(2021, 3, 22),
@@ -52,7 +61,7 @@ def test_frequency_helper_pop_latest_doc(mocked_today):
     assert latest_dt is None
 
 
-def test_frequency_helper_increment_frequency(mocked_today):
+def test_frequency_helper_increment_frequency(mocked_today, mock_get_config_object):
     start_dt = datetime.date(2021, 3, 15)
     freq_helper = pybanker.frequency_utils.FrequencyHelper(
         'monthly', list(), start_dt)
@@ -60,7 +69,8 @@ def test_frequency_helper_increment_frequency(mocked_today):
     assert next_dt.isoformat() == '2021-04-14'
 
 
-def test_frequency_helper_find_missing_statements_good(mocked_today, caplog):
+def test_frequency_helper_find_missing_statements_good(
+        mocked_today, caplog, mock_get_config_object):
     caplog.set_level('DEBUG')
     statement_dts = [
         datetime.date(2021, 7, 1),

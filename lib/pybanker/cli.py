@@ -73,8 +73,11 @@ class PyBankerCli(object):
     def __call__(self):
         self.logger.debug('Inside call.')
         self.parse_args()
-        bank = pybanker.Banker()
-        bank(self.command)
+        try:
+            bank = pybanker.Banker()
+            bank(self.command)
+        except pybanker.shared.ConfigError:
+            raise
 
 
 def main():

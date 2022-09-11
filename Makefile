@@ -11,14 +11,15 @@ PIP_CMD = $(BIN_DIR)/pip3
 #
 PYTEST_CMD = $(BIN_DIR)/pytest
 PYTEST_ARGS =
+PYTEST_ARGS_MANUAL = --log-level debug --capture=no -x --pdb
 FLAKE8_CMD = $(BIN_DIR)/flake8
 FLAKE8_ARGS =
 PUR_CMD = $(BIN_DIR)/pur
 #
 SYS_PYTHON_CMD = $(shell which python3)
 
-ifeq ("$(TRAVIS)", "true")
-$(warning "Resetting commands for travis.")
+ifeq ("$(DISABLE_VIRTUAL_ENV)", "true")
+$(warning "Resetting commands for CI.")
 PIP_CMD = pip3
 PYTHON_CMD = python3
 PYTEST_CMD = pytest
@@ -36,14 +37,16 @@ _pip_reqs:
 	$(PIP_CMD) install --progress-bar off --upgrade pur
 	$(PIP_CMD) install --progress-bar off -r tests/requirements.txt
 	$(PIP_CMD) install --progress-bar off -r requirements.txt
+
+_dev_reqs:
 	$(PIP_CMD) install --progress-bar off -r dev_requirements.txt
 
 _setup_develop:
 	$(PYTHON_CMD) $(SETUP_PY) develop
 
-travis-setup: _pip_reqs _setup_develop
+ci-dev: _local_virtualenv _pip_reqs _setup_develop
 
-dev: _local_virtualenv travis-setup
+dev: ci-dev _dev_reqs
 
 update-reqs:
 	$(PUR_CMD) --requirement requirements.txt
@@ -64,7 +67,9 @@ _test_flake8:
 	$(FLAKE8_CMD) $(FLAKE8_ARGS)
 
 manual-pytest:
-	$(PYTEST_CMD) --log-level debug --capture=no $(PYTEST_ARGS)
+	$(PYTEST_CMD) \
+		$(PYTEST_ARGS) \
+		$(PYTEST_ARGS_MANUAL)
 
 _test_pytest:
 	$(PYTEST_CMD) $(PYTEST_ARGS)
@@ -73,6 +78,9 @@ test: _test_pip_outdated _test_flake8 _test_pytest
 
 clean-cover:
 	find . -depth -name \*.cover -exec rm {} \;
+
+_local_gh_actions:
+	act --container-architecture linux/amd64
 
 clean:
 	rm -rf $(VENV_DIR)

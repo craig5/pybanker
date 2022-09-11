@@ -9,8 +9,9 @@ import pybanker.shared
 
 
 _FREQUENCY_DATA = {
-    'monthly': {'days': 30, 'buffer': 5},
     'bi-weekly': {'days': 14, 'buffer': 2},
+    'monthly': {'days': 30, 'buffer': 5},
+    'quarterly': {'days': 90, 'buffer': 5},
 }
 
 
