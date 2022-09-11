@@ -11,6 +11,7 @@ PIP_CMD = $(BIN_DIR)/pip3
 #
 PYTEST_CMD = $(BIN_DIR)/pytest
 PYTEST_ARGS =
+PYTEST_ARGS_MANUAL = --log-level debug --capture=no -x --pdb
 FLAKE8_CMD = $(BIN_DIR)/flake8
 FLAKE8_ARGS =
 PUR_CMD = $(BIN_DIR)/pur
@@ -64,7 +65,9 @@ _test_flake8:
 	$(FLAKE8_CMD) $(FLAKE8_ARGS)
 
 manual-pytest:
-	$(PYTEST_CMD) --log-level debug --capture=no $(PYTEST_ARGS)
+	$(PYTEST_CMD) \
+		$(PYTEST_ARGS) \
+		$(PYTEST_ARGS_MANUAL)
 
 _test_pytest:
 	$(PYTEST_CMD) $(PYTEST_ARGS)

@@ -40,7 +40,7 @@ class GlobalConfig(object):
         self._init_vars()
         # TODO add kwarg for "config_file" to override default
         self._config_file = None
-        self._load_config_file()
+        self.conf = self._get_config_object()
 
     def _init_vars(self):
         self._data_dir = None
@@ -60,12 +60,13 @@ class GlobalConfig(object):
             self._config_file = self._build_config_file()
         return self._config_file
 
-    def _load_config_file(self):
-        self.conf = configparser.ConfigParser()
+    def _get_config_object(self):
+        conf = configparser.ConfigParser()
         if not os.path.exists(self.config_file):
             raise ConfigError(f'Config file does not exist: {self.config_file}')
         self.logger.debug('Reading config file: {}'.format(self.config_file))
-        self.conf.read(self.config_file)
+        conf.read(self.config_file)
+        return conf
 
     @property
     def data_dir(self):
