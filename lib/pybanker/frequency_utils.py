@@ -48,10 +48,16 @@ class FrequencyHelper:
         self.end_dt = end_dt
         if self.end_dt is None:
             self.end_dt = _get_today_dt()
+        self._buffer_days = None
+
+    def _get_default_buffer_days(self):
+        return self.frequency_data['buffer']
 
     @property
     def buffer_days(self):
-        return self.frequency_data['buffer']
+        if self._buffer_days is None:
+            self._buffer_days = self._get_default_buffer_days()
+        return self._buffer_days
 
     @property
     def days_delta(self):
@@ -94,11 +100,11 @@ class FrequencyHelper:
                     latest_doc_dt = self._pop_latest_doc()
                     continue
             else:
-                self.logger.error('No more statments.')
+                self.logger.debug('No more statments.')
             # If "latest_doc_dt" is outside the window, then increment the window first,
             # this should make ""window_start_dt" the DESIRED date, i.e. the "window end".
             window_start_dt = self._increment_frequency(window_start_dt)
-            self.logger.error(f'Missing statement: {window_start_dt}')
+            self.logger.debug(f'Missing statement: {window_start_dt}')
             missing.append(window_start_dt)
         return missing
 

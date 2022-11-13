@@ -41,7 +41,7 @@ class PyBankerCli(object):
         self.cli = argparse.ArgumentParser(description=__doc__)
         self.cli.add_argument(
             '--log-level',
-            choices=['debug', 'info', 'warn'],
+            choices=['debug', 'info', 'warn', 'error', 'fatal'],
             help='Change logging level.'
         )
         command_opts = [cur['option'] for cur in self.global_config.commands]
@@ -78,6 +78,9 @@ class PyBankerCli(object):
             bank(self.command)
         except pybanker.shared.ConfigError:
             raise
+        except pybanker.accounts.AccountConfigException as exc:
+            self.logger.fatal(exc)
+            raise SystemExit(11)
 
 
 def main():
