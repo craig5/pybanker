@@ -17,6 +17,14 @@ class AccountConfigException(Exception):
     pass
 
 
+class MissingStatements(Exception):
+
+    def __init__(self, message, account_name, missing):
+        super().__init__(message)
+        self.account_name = account_name
+        self.missing = missing
+
+
 class Accounts(collections.OrderedDict):
 
     def __init__(self):
@@ -38,11 +46,22 @@ class Accounts(collections.OrderedDict):
             raise AccountConfigException(msg)
         self.logger.debug(f'Elements in accounts dir: {len(contents)}')
         accounts = dict()
+        errors = list()
         for cur in contents:
             full = os.path.join(self.data_directory, cur)
-            new_account = _AccountItem(full)
+            if not os.path.isdir(full):
+                self.logger.debug(f'Skipping (not a dir): {full}')
+                continue
+            try:
+                new_account = _AccountItem(full)
+            except MissingStatements as exc:
+                errors.append(exc)
             accounts[new_account.short_name] = new_account
             self.logger.debug('Added account: {}'.format(new_account.name))
+        if len(errors) != 0:
+            for cur in errors:
+                self.logger.error(cur)
+            raise AccountConfigException('Missing statements.')
         return accounts
 
     @property
@@ -298,7 +317,7 @@ class _AccountItem(collections.UserDict):
                 self.logger.error(f'Missing statement: {self.name}: {cur}')
             msg = 'Missing statements: {0}: {1}'.format(
                 self.name, self.missing_statement_dates)
-            raise AccountConfigException(msg)
+            raise MissingStatements(msg, self.name, self.missing_statement_dates)
 
     def verify_data(self):
         raise NotImplementedError('Verify data is not done in accounts item.')

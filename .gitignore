@@ -65,3 +65,6 @@ venv
 
 # tests lib dir
 .lib
+
+# visual studio code
+.vscode/
