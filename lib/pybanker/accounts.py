@@ -133,18 +133,25 @@ class _AccountItem(collections.UserDict):
             raise AccountConfigException(msg)
         return data
 
-    @property
-    def statements_base_dir(self):
-        if self.type == 'payroll':
-            return 'pay-stubs'
+    def _default_statements_directory_basename(self):
         return 'statements'
 
+    @property
+    def statements_directory_basename(self):
+        key = 'statements_directory'
+        state_dir = self.get(key, None)
+        if state_dir is not None:
+            self.logger.debug(f'Found key "{key}": {state_dir}')
+            return state_dir
+        self.logger.debug("Using default statements directory.")
+        return self._default_statements_directory_basename()
+
     def _calc_statements_directory(self):
-        subdir = os.path.join(self.data_directory, self.statements_base_dir)
+        subdir = os.path.join(self.data_directory, self.statements_directory_basename)
         if os.path.exists(subdir):
             self.logger.debug(f'Using subdir for statements: {subdir}')
             return subdir
-        raise AccountConfigException(f'No statements directory: {self.name}')
+        raise AccountConfigException(f'No statements directory: {self.name}:{subdir}')
 
     @property
     def statements_directory(self):
@@ -256,23 +263,34 @@ class _AccountItem(collections.UserDict):
             return dt_date
         raise AccountConfigException(f'Cannot parse date string: {self.name} -> {date_string}')
 
+    def _is_skipable_statements_file(self, filename):
+        if filename.startswith('.'):
+            return True
+        if filename == 'index.yaml':
+            return True
+        return False
+
     def _load_statements(self):
         self.statements = dict()
+        self.statements.update(self._get_null_statements())
+        self.statements.update(self._get_known_missing_statements())
+        filename_date_map = self._get_filename_date_map_entries()
         for cur in os.listdir(self.statements_directory):
-            if cur.startswith('.'):
-                continue
-            if cur == 'index.yaml':
+            if self._is_skipable_statements_file(cur):
                 continue
             item = {'full_path': os.path.join(self.statements_directory, cur)}
-            item['date'] = self._parse_date_file_name(cur)
-            cur_key = item['date'].isoformat()
+            cur_dt_obj = filename_date_map.get(cur, None)
+            # If the current file is in the "date map",
+            # then use the value of the map's key as the "date string".
+            if cur_dt_obj is not None:
+                self.logger.debug(f"Found in filename_date_map: {cur_dt_obj}")
+                cur_key = cur_dt_obj.isoformat()
+            else:
+                item['date'] = self._parse_date_file_name(cur)
+                cur_key = item['date'].isoformat()
             if cur_key in self.statements:
-                raise Exception(f'Duplicate statements: {self.name}')
+                raise Exception(f'Duplicate statements: {self.name}:{cur_key}')
             self.statements[cur_key] = item
-        for cur in self._get_null_statements():
-            self.statements[cur] = None
-        for cur in self._get_known_missing_statements():
-            self.statements[cur] = None
 
     def _convert_raw_to_datetimes(self, key_name):
         raw_list = self.statements_index.get(key_name, list())
@@ -295,11 +313,21 @@ class _AccountItem(collections.UserDict):
             converted_list.append(cur_key)
         return converted_list
 
+    def _get_filename_date_map_entries(self):
+        key = 'filename_date_map'
+        return self.statements_index.get(key, dict())
+
     def _get_null_statements(self):
-        return self._convert_raw_to_datetimes('null_statements')
+        nulls = dict()
+        for cur in self._convert_raw_to_datetimes('null_statements'):
+            nulls[cur] = None
+        return nulls
 
     def _get_known_missing_statements(self):
-        return self._convert_raw_to_datetimes('known_missing_statements')
+        missing = dict()
+        for cur in self._convert_raw_to_datetimes('known_missing_statements'):
+            missing[cur] = None
+        return missing
 
     def _verify_statements(self):
         if self.is_cash():
