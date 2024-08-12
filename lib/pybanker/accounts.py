@@ -46,22 +46,17 @@ class Accounts(collections.OrderedDict):
             raise AccountConfigException(msg)
         self.logger.debug(f'Elements in accounts dir: {len(contents)}')
         accounts = dict()
-        errors = list()
-        for cur in contents:
+        for cur in sorted(contents):
             full = os.path.join(self.data_directory, cur)
+            if cur.startswith('.'):
+                self.logger.debug(f'Skipping dotfile: {cur}')
+                continue
             if not os.path.isdir(full):
                 self.logger.debug(f'Skipping (not a dir): {full}')
                 continue
-            try:
-                new_account = _AccountItem(full)
-            except MissingStatements as exc:
-                errors.append(exc)
+            new_account = _AccountItem(full)
             accounts[new_account.short_name] = new_account
             self.logger.debug('Added account: {}'.format(new_account.name))
-        if len(errors) != 0:
-            for cur in errors:
-                self.logger.error(cur)
-            raise AccountConfigException('Missing statements.')
         return accounts
 
     @property
@@ -102,7 +97,11 @@ class _AccountItem(collections.UserDict):
             self.logger.debug(f'Shared statements for: {self.name}')
         else:
             self._load_statements()
-            self._verify_statements()
+            try:
+                self._verify_statements()
+            except MissingStatements as exc:
+                count = len(exc.missing)
+                self.logger.error(f'Missing statements: {self} ({count})')
 
     def __str__(self):
         return self['name']
