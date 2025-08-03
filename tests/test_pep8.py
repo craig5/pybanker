@@ -1,10 +1,5 @@
 #!/usr/bin/env python3 -B
-"""
-Test the basic formatting of the python code.
-"""
-# python core packages
-# third party packages
-# custom packages
+"""Test the basic formatting of the python code."""
 import utils_for_tests
 
 

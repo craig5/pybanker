@@ -1,13 +1,12 @@
 """
 """
-# core python packages
 import collections
 import hashlib
 import os
 import re
-# third party packages
+
 import yaml
-# custom packages
+
 import pybanker.shared
 
 

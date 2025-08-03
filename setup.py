@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
-"""
-Setup script for pybanker (python3).
-"""
-# core python packaes
+"""Setup script for pybanker (python3)."""
 import setuptools
-# third party packages
-# custom packages
-import git_tools
 
+import git_tools
 
 _LIB_DIR = 'lib'
 

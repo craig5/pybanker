@@ -1,14 +1,10 @@
 """
 Global config for pybanker.
 """
-# core python libraries
 import configparser
+import importlib.metadata
 import logging
 import os
-import pkg_resources
-# third party libraries
-# custom libraries
-
 
 _PACKAGE_NAME = 'pybanker'
 
@@ -24,8 +20,6 @@ def home_dir():
 class GlobalConfig(object):
     base_logger_name = _PACKAGE_NAME
     default_logger_level = logging.WARN
-    version = pkg_resources.get_distribution(_PACKAGE_NAME).version
-    #
     package_name = _PACKAGE_NAME
     logger_level = logging.INFO
     # The first one ([0]) is the default.
@@ -37,6 +31,7 @@ class GlobalConfig(object):
 
     def __init__(self):
         self.logger = self.build_logger(self)
+        self.version = importlib.metadata.version(self.package_name)
         self._init_vars()
         # TODO add kwarg for "config_file" to override default
         self._config_file = None
@@ -92,7 +87,12 @@ class GlobalConfig(object):
         return logger
 
     def build_logger_name(self, class_object):
-        return '.'.join([self.base_logger_name, class_object.__class__.__name__])
+        this_name = class_object.__class__.__name__
+        # Handles the case when it is called from a classmethod. Eg ...build_logger(cls)
+        if this_name == 'type':
+            this_name = class_object.__name__
+        name = '.'.join([self.base_logger_name, this_name])
+        return name
 
 
 if __name__ == '__main__':

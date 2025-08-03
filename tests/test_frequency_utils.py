@@ -1,11 +1,10 @@
 #!/usr/bin/env python3 -B
 """Test for pybanker.frequency_utils class and routines."""
-# python core packages
 import configparser
 import datetime
-# third party packages
+
 import pytest
-# custom packages
+
 import pybanker.frequency_utils
 
 

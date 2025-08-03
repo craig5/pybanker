@@ -1,9 +1,6 @@
 #!/usr/bin/env python3 -B
 """
 """
-# python core packages
-# third party packages
-# custom packages
 import utils_for_tests
 
 

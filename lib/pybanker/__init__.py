@@ -1,14 +1,12 @@
 """
 Main class that wraps pybanker functionality
 """
-# core python libraries
 import logging
-# third party libraries
-# custom libraries
-import pybanker.shared
+
 import pybanker.accounts
-import pybanker.schedule
 import pybanker.receipts
+import pybanker.schedule
+import pybanker.shared
 import pybanker.transactions
 
 
@@ -38,14 +36,14 @@ class Banker(object):
         self.logger.debug('Logger initialized: {0}'.format(logger_name))
 
     def load_data(self):
-        self.accounts = pybanker.accounts.Accounts()
+        self.account_manager = pybanker.accounts.AccountManager()
         self.schedule = pybanker.schedule.Schedule()
         self.receipts = pybanker.receipts.Receipts()
         self.transactions = pybanker.transactions.Transactions()
         self.transactions.link_receipts(self.receipts)
 
     def list_accounts(self):
-        self.accounts.show_summary()
+        self.account_manager.show_summary()
 
     def show_schedule(self):
         self.schedule.show_summary()
