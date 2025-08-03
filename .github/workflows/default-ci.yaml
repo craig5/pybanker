@@ -1,14 +1,17 @@
 name: Default CI (make dev test)
 on:
   - push
+env:
+  DISABLE_VIRTUAL_ENV: true
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version:
-          - "3.9"
-          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
     steps:
       - uses: actions/checkout@v3
         with:

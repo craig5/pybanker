@@ -1,11 +1,9 @@
 """
 Command line tool to mange your finances.
 """
-# core python packages
 import argparse
 import logging
-# third party packages
-# custom packages
+
 import pybanker.shared
 
 

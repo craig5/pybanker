@@ -1,11 +1,10 @@
 """
 Classes to handle the scheduled items.
 """
-# core python libraries
 import logging
-# third party libraries
+
 import yaml
-# custom libraries
+
 import pybanker.shared
 
 

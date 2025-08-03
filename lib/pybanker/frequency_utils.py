@@ -1,13 +1,11 @@
 """
 Classes related to the accounts.
 """
-# core python packages
 import datetime
-# third party packages
-# custom packages
+
 import pybanker.shared
 
-
+# TODO Merge with statements._StatementPeriod
 _FREQUENCY_DATA = {
     'bi-weekly': {'days': 14, 'buffer': 2},
     'monthly': {'days': 30, 'buffer': 5},
@@ -44,6 +42,13 @@ class FrequencyHelper:
         except KeyError:
             raise UnknownFrequency(f'Unknown frequency: {self.frequency}')
         self.statement_dates = statement_dates
+        # Incoming dates SHOULD be sorted.
+        # If not, sorted, sort them and report a warning.
+        sorted_statements = sorted(self.statement_dates)
+        if sorted_statements != self.statement_dates:
+            self.logger.warning('Statements are not sorted.')
+            self.statement_dates = sorted_statements
+            breakpoint()
         self.start_dt = start_dt
         self.end_dt = end_dt
         if self.end_dt is None:

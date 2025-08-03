@@ -20,3 +20,8 @@ To test the GitHub actions config locally, you can run the `act` command.
 It requires `docker` to be running.
 
 (Note: it won't check "everything". But, it is good enough for some validation.)
+
+### Python Versions
+
+I had to remove python 3.9 and 3.10 support due to some differences with
+`typing`.

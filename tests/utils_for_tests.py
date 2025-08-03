@@ -1,16 +1,20 @@
 #!/usr/bin/env python -B
 """
 Some generic utilities for the tests.
+
+
+The name of this package is a little odd...
+The test collector (nose) will grab anything that starts with "test_".
+So, I avoided that prefix and this was the best I could come up with...
+
+TODO: verify this filename since moving away from nose.
+Eg I think pytest uses a standard name for shared routines.
 """
-# The name of this package is a little odd...
-# The test collector (nose) will grab anything that starts with "test_".
-# So, I avoided that prefix and this was the best I could come up with...
-# python core libraries
 import logging
 import os
-# third party libraries
-import flake8.api.legacy
 import unittest
+
+import flake8.api.legacy
 
 
 class BaseTestCase(unittest.TestCase):

@@ -1,11 +1,9 @@
 """
 """
-# core python packages
 import collections
 import logging
 import os
-# third party packages
-# custom packages
+
 import pybanker.shared
 
 
