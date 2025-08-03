@@ -49,7 +49,7 @@ _dev_reqs:
 _setup_develop:
 	$(PYTHON_CMD) $(SETUP_PY) develop
 
-ci-dev: _local_virtualenv _pip_reqs _setup_develop
+ci-dev: _pip_reqs _setup_develop
 
 dev: ci-dev _dev_reqs
 

@@ -1,6 +1,8 @@
 name: Default CI (make dev test)
 on:
   - push
+env:
+  DISABLE_VIRTUAL_ENV: true
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
