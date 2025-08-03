@@ -29,6 +29,7 @@ PIP_CMD = pip3
 PYTHON_CMD = python3
 PYTEST_CMD = pytest
 FLAKE8_CMD = flake8
+ISORT_CMD = isort
 endif
 
 # To install venv on ubuntu 14.04:
