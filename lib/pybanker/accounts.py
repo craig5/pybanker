@@ -48,7 +48,6 @@ class AccountManager:
             except Exception as exc:
                 self.logger.exception(exc)
                 self.logger.error('Could not create account: %s', cur)
-                breakpoint()
                 raise
             accounts[new_account.slug] = new_account
             self.logger.debug('Added account: {}'.format(new_account.slug))
@@ -122,7 +121,6 @@ class _AccountIndexData:
             this = cls(slug=slug, index_path=index_path, **data)
         except Exception as exc:
             logger.exception(exc)
-            breakpoint()
         return this
 
 

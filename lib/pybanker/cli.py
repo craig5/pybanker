@@ -39,7 +39,7 @@ class PyBankerCli(object):
         self.cli = argparse.ArgumentParser(description=__doc__)
         self.cli.add_argument(
             '--log-level',
-            choices=['debug', 'info', 'warn', 'error', 'fatal'],
+            choices=['debug', 'info', 'warning', 'error', 'fatal'],
             help='Change logging level.'
         )
         command_opts = [cur['option'] for cur in self.global_config.commands]

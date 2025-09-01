@@ -8,8 +8,10 @@ import pybanker.shared
 # TODO Merge with statements._StatementPeriod
 _FREQUENCY_DATA = {
     'bi-weekly': {'days': 14, 'buffer': 2},
+    'semi-monthly': {'days': 15, 'buffer': 5},
     'monthly': {'days': 30, 'buffer': 5},
     'quarterly': {'days': 90, 'buffer': 5},
+    'yearly': {'days': 365, 'buffer': 14},
 }
 
 
@@ -48,7 +50,6 @@ class FrequencyHelper:
         if sorted_statements != self.statement_dates:
             self.logger.warning('Statements are not sorted.')
             self.statement_dates = sorted_statements
-            breakpoint()
         self.start_dt = start_dt
         self.end_dt = end_dt
         if self.end_dt is None:
