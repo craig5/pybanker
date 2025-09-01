@@ -52,7 +52,7 @@ _setup_develop:
 
 ci-dev: _pip_reqs _setup_develop
 
-dev: ci-dev _dev_reqs
+dev: _local_virtualenv ci-dev _dev_reqs
 
 run:
 	PYTHONBREAKPOINT=ipdb.set_trace $(BIN_DIR)/pybanker --log-level debug

@@ -68,13 +68,14 @@ class _StatementItem:
         except Exception:
             pass
         # TODO unit test to verify this behavior
-        breakpoint()
 
 
 class _StatementPeriod(enum.Enum):
     bi_weekly = 'bi-weekly'
+    semi_monthly = 'semi-monthly'
     monthly = 'monthly'
     quarterly = 'quarterly'
+    yearly = 'yearly'
 
 
 @dataclasses.dataclass
@@ -129,7 +130,7 @@ class _IndexData:
         except Exception as exc:
             # TODO make this a real exception once the "legacy support" is removed.
             # logger.exception(exc)
-            logger.debug('Could not create from file: %s', exc)
+            logger.warning('Could not create from file: %s', exc)
             this = None
         return this
 
@@ -137,7 +138,7 @@ class _IndexData:
 @dataclasses.dataclass
 class _StatementsDirectory:
     path: pathlib.Path
-    account_index_data: object
+    account_index_data: object = dataclasses.field(repr=False)
 
     def __post_init__(self):
         self.config = pybanker.shared.GlobalConfig()
@@ -159,6 +160,7 @@ class _StatementsDirectory:
         )
         self.missing_statement_dates = self.freq_helper.find_missing_statement_dates()
 
+    # TODO remove... _legacy_index_data()
     def _legacy_index_data(self):
         self.logger.warning('Using LEGACY index data: %s', self)
         try:
@@ -181,7 +183,7 @@ class _StatementsDirectory:
             this = _IndexData(index_path=self.index_path, **index_data)
         except Exception as exc:
             self.logger.exception(exc)
-            breakpoint()
+            raise
         return this
 
     @functools.cached_property
@@ -216,24 +218,22 @@ class _StatementsDirectory:
                 actual_file_paths.remove(cur_path)
             except ValueError:
                 self.logger.error(f'File in filename_date_map does not exist: {cur_path}')
-                breakpoint()
             found_dts.append(new_item.date_dt)
             statements.append(new_item)
         for cur in self.index_data.null_statements:
             if cur.date_dt in found_dts:
-                raise ConfigError(f'Duplicate dates: {cur.date_dt}')
+                raise ConfigError(f'Duplicate dates: {cur.date_dt} (path:{self.path})')
             found_dts.append(cur.date_dt)
             statements.append(cur)
         for cur in self.index_data.known_missing_statements:
             if cur.date_dt in found_dts:
-                breakpoint()
-                raise ConfigError(f'Duplicate dates: {cur.date_dt}')
+                raise ConfigError(f'Duplicate dates: {cur.date_dt} (path:{self.path})')
             found_dts.append(cur.date_dt)
             statements.append(cur)
         for cur in actual_file_paths:
             new_item = _StatementItem.from_file(cur, self.index_data.name_formats)
             if new_item.date_dt in found_dts:
-                raise ConfigError(f'Duplicate dates: {new_item.date_dt}')
+                raise ConfigError(f'Duplicate dates: {new_item.date_dt} (path:{self.path})')
             found_dts.append(new_item.date_dt)
             statements.append(new_item)
         # Sort the statements by date.
@@ -276,7 +276,7 @@ class StatementsManager:
 
     @functools.cached_property
     def statements(self):
-        breakpoint()
+        raise NotImplementedError('StatementsManager.statements not done.')
 
     def verify(self):
         self.logger.debug('Verifying statements: %s', self.account_key)
